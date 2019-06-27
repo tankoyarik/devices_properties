@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: devices_nginx
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/code
+      - ./etc/nginx:/etc/nginx/conf.d
+    depends_on:
+      - backend
+  backend:
+    build: .
+    container_name: django_backend
+    volumes:
+      - .:/devices_properties
+    expose:
+      - "8000"
+    environment:
+      DATABASE_NAME: devices
+      DATABASE_USER: devices_user
+      DATABASE_PASSWORD: asdfasdf
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+    entrypoint: ./entrypoint.sh
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: devices
+      POSTGRES_USER: devices_user
+      POSTGRES_PASSWORD: asdfasdf
+    volumes:
+      - ./postgres/data:/var/lib/postgresql
+    expose:
+      - "5432"
